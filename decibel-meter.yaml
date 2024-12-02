@@ -1,0 +1,56 @@
+esphome:
+  name: decibel-meter
+  friendly_name: decibel_meter
+  includes:
+    - decibel_meter.h
+
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "xxx"
+
+ota:
+  password: "xxx"
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Decibel-Meter Fallback Hotspot"
+    password: "xxx"
+
+captive_portal:
+
+i2c:
+  sda: 5  # Adjust if needed for your ESP32 board
+  scl: 18  # Adjust if needed for your ESP32 board
+  scan: true  # Automatically discover I2C devices
+
+sensor:
+  - platform: custom
+    lambda: |-
+      auto *db_meter = new DecibelMeter();
+      App.register_component(db_meter);
+      return {
+        db_meter->decibel_sensor_ = new Sensor(),
+        db_meter->min_sensor_ = new Sensor(),
+        db_meter->max_sensor_ = new Sensor()
+      };
+    sensors:
+      - name: "Decibel Level"
+        id: decibel_level_sensor  # Assign a unique ID
+      - name: "Min Decibel"
+        id: min_decibel_sensor  # Assign a unique ID
+      - name: "Max Decibel"
+        id: max_decibel_sensor  # Assign a unique ID
